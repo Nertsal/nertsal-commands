@@ -1,14 +1,18 @@
 mod command_message;
 mod command_node;
 
-use command_message::*;
-use command_node::*;
+pub use command_message::*;
+pub use command_node::*;
 
 pub struct Commands<T> {
     pub commands: Vec<CommandNode<T>>,
 }
 
 impl<T> Commands<T> {
+    pub fn new(commands: Vec<CommandNode<T>>) -> Self {
+        Self { commands }
+    }
+
     pub fn perform_commands(&self, actor: &mut T, message: &CommandMessage) -> Vec<Response> {
         self.find_commands(message)
             .into_iter()
