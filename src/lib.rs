@@ -4,14 +4,11 @@ mod command_node;
 pub use command_message::*;
 pub use command_node::*;
 
-pub struct Commands<T, S: Clone> {
+pub struct Commands<T, S> {
     pub commands: Vec<CommandNode<T, S>>,
 }
 
-impl<T, S> Commands<T, S>
-where
-    S: Clone,
-{
+impl<T, S> Commands<T, S> {
     pub fn new(commands: Vec<CommandNode<T, S>>) -> Self {
         Self { commands }
     }
@@ -19,7 +16,7 @@ where
     pub fn perform_commands(&self, actor: &mut T, message: &CommandMessage<S>) -> Vec<Response> {
         self.find_commands(message)
             .into_iter()
-            .map(|(command, args)| command(actor, message.sender.clone(), args))
+            .map(|(command, args)| command(actor, &message.sender, args))
             .collect()
     }
 
@@ -47,9 +44,6 @@ where
     }
 }
 
-fn check_authority_level<S: Clone>(
-    authority_level: &AuthorityLevel,
-    message: &CommandMessage<S>,
-) -> bool {
+fn check_authority_level<S>(authority_level: &AuthorityLevel, message: &CommandMessage<S>) -> bool {
     message.authority_level >= *authority_level
 }

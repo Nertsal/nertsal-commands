@@ -22,7 +22,7 @@ pub enum CommandNode<T, S> {
 pub type AuthorityLevel = usize;
 pub type Argument = String;
 pub type Response = Option<String>;
-pub type Command<T, S> = Arc<dyn Fn(&mut T, S, Vec<Argument>) -> Response + Send + Sync>;
+pub type Command<T, S> = Arc<dyn Fn(&mut T, &S, Vec<Argument>) -> Response + Send + Sync>;
 
 #[derive(Clone, Copy)]
 pub enum ArgumentType {
