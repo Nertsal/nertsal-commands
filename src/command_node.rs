@@ -1,29 +1,28 @@
 use std::sync::Arc;
 
-pub enum CommandNode<T> {
+pub enum CommandNode<T, S> {
     Literal {
         literals: Vec<String>,
-        child_nodes: Vec<CommandNode<T>>,
+        child_nodes: Vec<CommandNode<T, S>>,
     },
     Argument {
         argument_type: ArgumentType,
-        child_nodes: Vec<CommandNode<T>>,
+        child_nodes: Vec<CommandNode<T, S>>,
     },
     ArgumentChoice {
         choices: Vec<String>,
-        child_nodes: Vec<CommandNode<T>>,
+        child_nodes: Vec<CommandNode<T, S>>,
     },
     Final {
         authority_level: AuthorityLevel,
-        command: Command<T>,
+        command: Command<T, S>,
     },
 }
 
 pub type AuthorityLevel = usize;
 pub type Argument = String;
-pub type SenderName = String;
 pub type Response = Option<String>;
-pub type Command<T> = Arc<dyn Fn(&mut T, SenderName, Vec<Argument>) -> Response + Send + Sync>;
+pub type Command<T, S> = Arc<dyn Fn(&mut T, S, Vec<Argument>) -> Response + Send + Sync>;
 
 #[derive(Clone, Copy)]
 pub enum ArgumentType {
@@ -43,12 +42,12 @@ macro_rules! child_nodes {
     };
 }
 
-impl<T> CommandNode<T> {
+impl<T, S> CommandNode<T, S> {
     pub fn check_node(
         &self,
         message: &str,
         mut arguments: Vec<Argument>,
-    ) -> Option<(&CommandNode<T>, Vec<Argument>)> {
+    ) -> Option<(&CommandNode<T, S>, Vec<Argument>)> {
         match self {
             CommandNode::Literal {
                 literals,
