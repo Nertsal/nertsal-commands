@@ -2,11 +2,14 @@ use super::*;
 
 impl<T, S> CommandNode<T, S> {
     pub fn literal<'a>(
-        literals: impl Iterator<Item = &'a str>,
+        literals: impl IntoIterator<Item = &'a str>,
         children: Vec<CommandNode<T, S>>,
     ) -> Self {
         Self::Literal {
-            literals: literals.map(|literal| literal.to_owned()).collect(),
+            literals: literals
+                .into_iter()
+                .map(|literal| literal.to_owned())
+                .collect(),
             child_nodes: children,
         }
     }
@@ -19,15 +22,18 @@ impl<T, S> CommandNode<T, S> {
     }
 
     pub fn argument_choice<'a>(
-        choices: impl Iterator<Item = &'a str>,
+        choices: impl IntoIterator<Item = &'a str>,
         children: Vec<CommandNode<T, S>>,
     ) -> Self {
         Self::ArgumentChoice {
-            choices: choices.map(|choice| choice.to_owned()).collect(),
+            choices: choices
+                .into_iter()
+                .map(|choice| choice.to_owned())
+                .collect(),
             child_nodes: children,
         }
     }
-    
+
     pub fn final_node(authority_level: AuthorityLevel, command: Command<T, S>) -> Self {
         Self::Final {
             authority_level,
