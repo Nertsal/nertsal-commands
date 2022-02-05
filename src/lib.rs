@@ -33,6 +33,7 @@ impl<T, S> Commands<T, S> {
                 CommandNode::Final {
                     authority_level,
                     command,
+                    ..
                 } => {
                     if check_authority_level(authority_level, &message) {
                         Some((command.clone(), arguments))

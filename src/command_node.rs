@@ -14,6 +14,9 @@ pub enum CommandNode<T, S> {
         child_nodes: Vec<CommandNode<T, S>>,
     },
     Final {
+        /// If `true`, then this node will activate only when the message is fully consumed,
+        /// when it reached this node. If `false`, then this node will always activate if reached.
+        expects_empty_message: bool,
         authority_level: AuthorityLevel,
         command: Command<T, S>,
     },
@@ -103,11 +106,14 @@ impl<T, S> CommandNode<T, S> {
                 })
                 .flatten(),
 
-            CommandNode::Final { .. } => {
-                if message.is_empty() {
-                    Some((self, arguments))
-                } else {
+            &CommandNode::Final {
+                expects_empty_message,
+                ..
+            } => {
+                if expects_empty_message && !message.is_empty() {
                     None
+                } else {
+                    Some((self, arguments))
                 }
             }
         }

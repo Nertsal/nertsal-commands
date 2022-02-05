@@ -28,8 +28,13 @@ impl<T, S> CommandNode<T, S> {
         }
     }
 
-    pub fn final_node(authority_level: AuthorityLevel, command: Command<T, S>) -> Self {
+    pub fn final_node(
+        expects_empty_message: bool,
+        authority_level: AuthorityLevel,
+        command: Command<T, S>,
+    ) -> Self {
         Self::Final {
+            expects_empty_message,
             authority_level,
             command,
         }
