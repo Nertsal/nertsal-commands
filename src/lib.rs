@@ -15,10 +15,13 @@ impl<T, S> Commands<T, S> {
         Self { commands }
     }
 
-    pub fn perform_commands(&self, actor: &mut T, message: &CommandMessage<S>) -> Vec<Response> {
+    pub fn perform_commands<'a>(
+        &'a self,
+        actor: &'a mut T,
+        message: &'a CommandMessage<S>,
+    ) -> impl Iterator<Item = Response> + 'a {
         self.find_commands(message)
-            .map(|(command, args)| command(actor, &message.sender, args))
-            .collect()
+            .map(move |(command, args)| command(actor, &message.sender, args))
     }
 
     pub fn find_commands<'a>(
