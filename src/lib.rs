@@ -17,25 +17,27 @@ impl<T, S> Commands<T, S> {
 
     pub fn perform_commands(&self, actor: &mut T, message: &CommandMessage<S>) -> Vec<Response> {
         self.find_commands(message)
-            .into_iter()
             .map(|(command, args)| command(actor, &message.sender, args))
             .collect()
     }
 
-    pub fn find_commands(
-        &self,
-        message: &CommandMessage<S>,
-    ) -> Vec<(Command<T, S>, Vec<Argument>)> {
+    pub fn find_commands<'a>(
+        &'a self,
+        message: &'a CommandMessage<S>,
+    ) -> impl Iterator<Item = (Command<T, S>, Vec<Argument>)> + 'a {
+        let message_text = &message.message_text;
+        let message_authority_level = message.authority_level;
+
         self.commands
             .iter()
-            .filter_map(|com| com.check_node(&message.message_text, Vec::new()))
-            .filter_map(|(command, arguments)| match command {
+            .filter_map(move |com| com.check_node(message_text, Vec::new()))
+            .filter_map(move |(command, arguments)| match command {
                 CommandNode::Final {
                     authority_level,
                     command,
                     ..
                 } => {
-                    if check_authority_level(authority_level, &message) {
+                    if *authority_level >= message_authority_level {
                         Some((command.clone(), arguments))
                     } else {
                         None
@@ -43,10 +45,5 @@ impl<T, S> Commands<T, S> {
                 }
                 _ => unreachable!(),
             })
-            .collect()
     }
-}
-
-fn check_authority_level<S>(authority_level: &AuthorityLevel, message: &CommandMessage<S>) -> bool {
-    message.authority_level >= *authority_level
 }
