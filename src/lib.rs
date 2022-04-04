@@ -1,6 +1,7 @@
 mod command_message;
 mod command_node;
 mod constructor;
+mod completion;
 
 pub use command_message::*;
 pub use command_node::*;
