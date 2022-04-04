@@ -1,5 +1,23 @@
 use super::*;
 
+impl<T, S, Term: linefeed::Terminal> linefeed::Completer<Term> for Commands<T, S> {
+    fn complete(
+        &self,
+        _word: &str,
+        prompter: &linefeed::Prompter<Term>,
+        _start: usize,
+        _end: usize,
+    ) -> Option<Vec<linefeed::Completion>> {
+        let message = prompter.buffer();
+        Some(
+            self.commands
+                .iter()
+                .flat_map(|node| node.complete(message))
+                .collect(),
+        )
+    }
+}
+
 impl<T, S> CommandNode<T, S> {
     pub fn complete(&self, message: &str) -> Vec<linefeed::Completion> {
         let mut completions = Vec::new();
