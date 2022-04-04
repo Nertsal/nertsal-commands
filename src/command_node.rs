@@ -110,7 +110,7 @@ impl<T, S> CommandNode<T, S> {
                 expects_empty_message,
                 ..
             } => {
-                if expects_empty_message && !message.is_empty() {
+                if expects_empty_message && !message.trim().is_empty() {
                     None
                 } else {
                     Some((self, arguments))
