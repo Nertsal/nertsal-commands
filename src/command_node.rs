@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub enum CommandNode<T, S> {
     Literal {
         literals: Vec<String>,

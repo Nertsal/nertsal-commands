@@ -1,12 +1,13 @@
 mod command_message;
 mod command_node;
-mod constructor;
 mod completion;
+mod constructor;
 
 pub use command_message::*;
 pub use command_node::*;
 pub use constructor::*;
 
+#[derive(Clone)]
 pub struct Commands<T, S> {
     pub commands: Vec<CommandNode<T, S>>,
 }
