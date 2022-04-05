@@ -42,7 +42,7 @@ impl<T, S> Commands<T, S> {
                     command,
                     ..
                 } => {
-                    if *authority_level >= message_authority_level {
+                    if *authority_level <= message_authority_level {
                         Some((command.clone(), arguments))
                     } else {
                         None
