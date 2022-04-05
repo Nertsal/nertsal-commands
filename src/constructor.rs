@@ -1,6 +1,6 @@
 use super::*;
 
-impl<T, S> CommandNode<T, S> {
+impl<T: ?Sized, S> CommandNode<T, S> {
     pub fn literal<'a>(
         literals: impl IntoIterator<Item = impl Into<String>>,
         children: Vec<CommandNode<T, S>>,
