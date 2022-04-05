@@ -95,19 +95,22 @@ impl<T, S> CommandNode<T, S> {
                 .find(|choice| message.starts_with(*choice))
                 .map(|choice| {
                     let message = message[choice.len()..].trim();
+                    arguments.push(choice.to_owned());
                     child_nodes!(child_nodes, message, arguments);
                     None
                 })
                 .flatten(),
+
             &CommandNode::Final {
                 expects_empty_message,
                 ..
             } => {
-                if expects_empty_message && !message.trim().is_empty() {
-                    None
-                } else {
-                    Some((self, arguments))
-                }
+                Some((self, arguments))
+                // if expects_empty_message && !message.trim().is_empty() {
+                //     None
+                // } else {
+                //     Some((self, arguments))
+                // }
             }
         }
     }
