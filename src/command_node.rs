@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub enum CommandNode<T, S> {
+pub enum CommandNode<T: ?Sized, S> {
     Literal {
         literals: Vec<String>,
         child_nodes: Vec<CommandNode<T, S>>,
@@ -46,7 +46,7 @@ macro_rules! child_nodes {
     };
 }
 
-impl<T, S> CommandNode<T, S> {
+impl<T: ?Sized, S> CommandNode<T, S> {
     pub fn check_node(
         &self,
         message: &str,

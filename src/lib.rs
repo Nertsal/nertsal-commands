@@ -8,11 +8,11 @@ pub use command_node::*;
 pub use constructor::*;
 
 #[derive(Clone)]
-pub struct Commands<T, S> {
+pub struct Commands<T: ?Sized, S> {
     pub commands: Vec<CommandNode<T, S>>,
 }
 
-impl<T, S> Commands<T, S> {
+impl<T: ?Sized, S> Commands<T, S> {
     pub fn new(commands: Vec<CommandNode<T, S>>) -> Self {
         Self { commands }
     }
