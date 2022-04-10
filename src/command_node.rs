@@ -28,7 +28,7 @@ pub type Argument = String;
 pub type Response = Option<String>;
 pub type Command<T, S> = Arc<dyn Fn(&mut T, &S, Vec<Argument>) -> Response + Send + Sync>;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum ArgumentType {
     Word,
     Line,
