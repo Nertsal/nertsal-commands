@@ -39,18 +39,38 @@ impl<T, S> CommandBuilder<T, S> {
         command: Command<T, S>,
     ) -> CommandNode<T, S> {
         let final_node = CommandNode::final_node(expects_empty_message, authority_level, command);
-        (std::iter::once(final_node))
-            .chain(self.nodes.into_iter().rev())
-            .reduce(|child, mut parent| {
-                let children = match &mut parent {
-                    CommandNode::Literal { child_nodes, .. } => child_nodes,
-                    CommandNode::Argument { child_nodes, .. } => child_nodes,
-                    CommandNode::ArgumentChoice { child_nodes, .. } => child_nodes,
-                    CommandNode::Final { .. } => unreachable!(),
-                };
-                children.push(child);
-                parent
-            })
-            .unwrap()
+        fold_nodes(final_node, self.nodes.into_iter().rev())
     }
+
+    /// Assumes that there at least one node has been inserted before
+    pub fn split(self, children: impl IntoIterator<Item = CommandNode<T, S>>) -> CommandNode<T, S> {
+        assert!(
+            self.nodes.len() > 0,
+            "Expected at least one node in the builder"
+        );
+
+        let mut nodes = self.nodes.into_iter().rev();
+        let mut final_node = nodes.next().unwrap();
+        let child_nodes = final_node
+            .children_mut()
+            .expect("A final node cannot be in the middle");
+        child_nodes.extend(children);
+        fold_nodes(final_node, nodes)
+    }
+}
+
+fn fold_nodes<T, S>(
+    final_node: CommandNode<T, S>,
+    nodes: impl IntoIterator<Item = CommandNode<T, S>>,
+) -> CommandNode<T, S> {
+    (std::iter::once(final_node))
+        .chain(nodes.into_iter())
+        .reduce(|child, mut parent| {
+            let children = parent
+                .children_mut()
+                .expect("A final node cannot be in the middle");
+            children.push(child);
+            parent
+        })
+        .unwrap()
 }

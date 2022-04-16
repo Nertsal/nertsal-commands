@@ -113,4 +113,13 @@ impl<T: ?Sized, S> CommandNode<T, S> {
             }
         }
     }
+
+    pub fn children_mut(&mut self) -> Option<&mut Vec<CommandNode<T, S>>> {
+        match self {
+            Self::Literal { child_nodes, .. } => Some(child_nodes),
+            Self::Argument { child_nodes, .. } => Some(child_nodes),
+            Self::ArgumentChoice { child_nodes, .. } => Some(child_nodes),
+            Self::Final { .. } => None,
+        }
+    }
 }
