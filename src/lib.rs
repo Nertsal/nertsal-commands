@@ -1,8 +1,10 @@
+mod builder;
 mod command_message;
 mod command_node;
 mod completion;
 mod constructor;
 
+pub use builder::*;
 pub use command_message::*;
 pub use command_node::*;
 pub use constructor::*;
