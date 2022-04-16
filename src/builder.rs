@@ -1,10 +1,10 @@
 use super::*;
 
-pub struct CommandBuilder<T, S> {
+pub struct CommandBuilder<T: ?Sized, S> {
     nodes: Vec<CommandNode<T, S>>,
 }
 
-impl<T, S> CommandBuilder<T, S> {
+impl<T: ?Sized, S> CommandBuilder<T, S> {
     pub fn new() -> Self {
         Self { nodes: Vec::new() }
     }
@@ -59,7 +59,7 @@ impl<T, S> CommandBuilder<T, S> {
     }
 }
 
-fn fold_nodes<T, S>(
+fn fold_nodes<T: ?Sized, S>(
     final_node: CommandNode<T, S>,
     nodes: impl IntoIterator<Item = CommandNode<T, S>>,
 ) -> CommandNode<T, S> {
