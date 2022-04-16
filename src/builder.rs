@@ -1,37 +1,50 @@
 use super::*;
 
+/// Helps to easier create trees of [CommandNode]. Makes construction of
+/// deep command trees more concise. Conversely, constructing
+/// wide trees takes about as much words as with using
+/// constructors of [CommandNode]. Most helper functions in this struct
+/// allow constructing only 1-wide trees (effectively lists),
+/// but when you need to split a node, you can use the `split` function.
 pub struct CommandBuilder<T: ?Sized, S> {
     nodes: Vec<CommandNode<T, S>>,
 }
 
 impl<T: ?Sized, S> CommandBuilder<T, S> {
+    /// Initializes a builder
     pub fn new() -> Self {
         Self { nodes: Vec::new() }
     }
 
+    /// Adds a literal node that accepts specific literals
     pub fn literal(mut self, literals: impl IntoIterator<Item = impl Into<String>>) -> Self {
         self.nodes.push(CommandNode::literal(literals, vec![]));
         self
     }
 
+    /// Adds a literal node that expects an word argument
     pub fn word(mut self) -> Self {
         self.nodes
             .push(CommandNode::argument(ArgumentType::Word, vec![]));
         self
     }
 
+    /// Adds a literal node that takes a line as an argument
     pub fn line(mut self) -> Self {
         self.nodes
             .push(CommandNode::argument(ArgumentType::Line, vec![]));
         self
     }
 
+    /// Adds a literal node that accepts only certain literals
+    /// and forwards the chosen one as an argument
     pub fn choice(mut self, choices: impl IntoIterator<Item = impl Into<String>>) -> Self {
         self.nodes
             .push(CommandNode::argument_choice(choices, vec![]));
         self
     }
 
+    /// Finalizes the branch by adding a final node
     pub fn finalize(
         self,
         expects_empty_message: bool,
@@ -42,7 +55,9 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
         fold_nodes(final_node, self.nodes.into_iter().rev())
     }
 
-    /// Assumes that there at least one node has been inserted before
+    /// Split the branch into several. Useful when several commands
+    /// start from the same pattern.
+    /// Assumes that at least one node has been inserted before
     pub fn split(self, children: impl IntoIterator<Item = CommandNode<T, S>>) -> CommandNode<T, S> {
         assert!(
             self.nodes.len() > 0,
