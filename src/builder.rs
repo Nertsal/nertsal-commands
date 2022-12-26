@@ -89,3 +89,70 @@ fn fold_nodes<T: ?Sized, S>(
         })
         .unwrap()
 }
+
+#[macro_export]
+macro_rules! command {
+    // Final
+    ($empty:expr, $authority:expr, $function:expr) => {{
+        CommandNode::final_node($empty, $authority, $function)
+    }};
+    // Literal
+    ($($literals:literal),+; $($tail:tt)*) => {{
+        let children = vec![command!($($tail)*)];
+        CommandNode::literal([$($literals),+], children)
+    }};
+    // Choice
+    ($($choices:literal)|+; $($tail:tt)*) => {{
+        let children = vec![command!($($tail)*)];
+        CommandNode::argument_choice([$($choices),+], children)
+    }};
+    // Argument word
+    (word; $($tail:tt)*) => {{
+        let children = vec![command!($($tail)*)];
+        CommandNode::argument(ArgumentType::Word, children)
+    }};
+    // Argument line
+    (line; $($tail:tt)*) => {{
+        let children = vec![command!($($tail)*)];
+        CommandNode::argument(ArgumentType::Line, children)
+    }};
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Arc;
+
+    #[test]
+    fn test_command_macro() {
+        // `CommandNode::final_node(...)`
+        command!(true, 0, Arc::new(|_: &mut (), _: &(), _| None));
+
+        // `CommandBuilder::new().literal(["!help"]).finalize(...)`
+        command!(
+            "!help";
+            true, 0, Arc::new(|_: &mut (), _: &(), _| None)
+        );
+
+        // `CommandBuilder::new().literal(["!backup"]).choice(["create", "load"]).finalize(...)`
+        command!(
+            "!backup";
+            "create" | "load";
+            true, 0, Arc::new(|_: &mut (), _: &(), _| None)
+        );
+
+        // `CommandBuilder::new().literal(["!hello"]).word().finalize(...)`
+        command!(
+            "!hello";
+            word;
+            true, 0, Arc::new(|_: &mut (), _: &(), _| None)
+        );
+
+        // `CommandBuilder::new().literal(["!echo"]).line().finalize(...)`
+        command!(
+            "!echo";
+            line;
+            true, 0, Arc::new(|_: &mut (), _: &(), _| None)
+        );
+    }
+}
