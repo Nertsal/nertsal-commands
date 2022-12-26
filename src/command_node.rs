@@ -1,32 +1,31 @@
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub enum CommandNode<T: ?Sized, S> {
+pub enum CommandNode<T: ?Sized, S, R> {
     Literal {
         literals: Vec<String>,
-        child_nodes: Vec<CommandNode<T, S>>,
+        child_nodes: Vec<CommandNode<T, S, R>>,
     },
     Argument {
         argument_type: ArgumentType,
-        child_nodes: Vec<CommandNode<T, S>>,
+        child_nodes: Vec<CommandNode<T, S, R>>,
     },
     ArgumentChoice {
         choices: Vec<String>,
-        child_nodes: Vec<CommandNode<T, S>>,
+        child_nodes: Vec<CommandNode<T, S, R>>,
     },
     Final {
         /// If `true`, then this node will activate only when the message is fully consumed,
         /// when it reached this node. If `false`, then this node will always activate if reached.
         expects_empty_message: bool,
         authority_level: AuthorityLevel,
-        command: Command<T, S>,
+        command: Command<T, S, R>,
     },
 }
 
 pub type AuthorityLevel = usize;
 pub type Argument = String;
-pub type Response = Option<String>;
-pub type Command<T, S> = Arc<dyn Fn(&mut T, &S, Vec<Argument>) -> Response + Send + Sync>;
+pub type Command<T, S, R> = Arc<dyn Fn(&mut T, &S, Vec<Argument>) -> R + Send + Sync>;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ArgumentType {
@@ -46,12 +45,14 @@ macro_rules! child_nodes {
     };
 }
 
-impl<T: ?Sized, S> CommandNode<T, S> {
+type CheckedNode<'a, T, S, R> = (&'a CommandNode<T, S, R>, Vec<Argument>);
+
+impl<T: ?Sized, S, R> CommandNode<T, S, R> {
     pub fn check_node(
         &self,
         message: &str,
         mut arguments: Vec<Argument>,
-    ) -> Option<(&CommandNode<T, S>, Vec<Argument>)> {
+    ) -> Option<CheckedNode<T, S, R>> {
         match self {
             CommandNode::Literal {
                 literals,
@@ -111,7 +112,7 @@ impl<T: ?Sized, S> CommandNode<T, S> {
         }
     }
 
-    pub fn children_mut(&mut self) -> Option<&mut Vec<CommandNode<T, S>>> {
+    pub fn children_mut(&mut self) -> Option<&mut Vec<CommandNode<T, S, R>>> {
         match self {
             Self::Literal { child_nodes, .. } => Some(child_nodes),
             Self::Argument { child_nodes, .. } => Some(child_nodes),

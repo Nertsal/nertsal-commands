@@ -1,6 +1,6 @@
 use super::*;
 
-impl<T: ?Sized, S, Term: linefeed::Terminal> linefeed::Completer<Term> for Commands<T, S> {
+impl<T: ?Sized, S, R, Term: linefeed::Terminal> linefeed::Completer<Term> for Commands<T, S, R> {
     fn complete(
         &self,
         _word: &str,
@@ -18,7 +18,7 @@ impl<T: ?Sized, S, Term: linefeed::Terminal> linefeed::Completer<Term> for Comma
     }
 }
 
-impl<T: ?Sized, S> CommandNode<T, S> {
+impl<T: ?Sized, S, R> CommandNode<T, S, R> {
     pub fn complete(&self, message: &str) -> Vec<linefeed::Completion> {
         let mut completions = Vec::new();
         match self {

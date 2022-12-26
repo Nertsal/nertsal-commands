@@ -6,11 +6,11 @@ use super::*;
 /// constructors of [CommandNode]. Most helper functions in this struct
 /// allow constructing only 1-wide trees (effectively lists),
 /// but when you need to split a node, you can use the `split` function.
-pub struct CommandBuilder<T: ?Sized, S> {
-    nodes: Vec<CommandNode<T, S>>,
+pub struct CommandBuilder<T: ?Sized, S, R> {
+    nodes: Vec<CommandNode<T, S, R>>,
 }
 
-impl<T: ?Sized, S> CommandBuilder<T, S> {
+impl<T: ?Sized, S, R> CommandBuilder<T, S, R> {
     /// Initializes a builder
     pub fn new() -> Self {
         Self { nodes: Vec::new() }
@@ -49,8 +49,8 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
         self,
         expects_empty_message: bool,
         authority_level: AuthorityLevel,
-        command: Command<T, S>,
-    ) -> CommandNode<T, S> {
+        command: Command<T, S, R>,
+    ) -> CommandNode<T, S, R> {
         let final_node = CommandNode::final_node(expects_empty_message, authority_level, command);
         fold_nodes(final_node, self.nodes.into_iter().rev())
     }
@@ -58,7 +58,10 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
     /// Split the branch into several. Useful when several commands
     /// start from the same pattern.
     /// Assumes that at least one node has been inserted before
-    pub fn split(self, children: impl IntoIterator<Item = CommandNode<T, S>>) -> CommandNode<T, S> {
+    pub fn split(
+        self,
+        children: impl IntoIterator<Item = CommandNode<T, S, R>>,
+    ) -> CommandNode<T, S, R> {
         assert!(
             !self.nodes.is_empty(),
             "Expected at least one node in the builder"
@@ -74,16 +77,16 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
     }
 }
 
-impl<T: ?Sized, S> Default for CommandBuilder<T, S> {
+impl<T: ?Sized, S, R> Default for CommandBuilder<T, S, R> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-fn fold_nodes<T: ?Sized, S>(
-    final_node: CommandNode<T, S>,
-    nodes: impl IntoIterator<Item = CommandNode<T, S>>,
-) -> CommandNode<T, S> {
+fn fold_nodes<T: ?Sized, S, R>(
+    final_node: CommandNode<T, S, R>,
+    nodes: impl IntoIterator<Item = CommandNode<T, S, R>>,
+) -> CommandNode<T, S, R> {
     (std::iter::once(final_node))
         .chain(nodes.into_iter())
         .reduce(|child, mut parent| {

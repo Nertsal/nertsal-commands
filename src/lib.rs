@@ -10,12 +10,12 @@ pub use command_node::*;
 pub use constructor::*;
 
 #[derive(Clone)]
-pub struct Commands<T: ?Sized, S> {
-    pub commands: Vec<CommandNode<T, S>>,
+pub struct Commands<T: ?Sized, S, R> {
+    pub commands: Vec<CommandNode<T, S, R>>,
 }
 
-impl<T: ?Sized, S> Commands<T, S> {
-    pub fn new(commands: Vec<CommandNode<T, S>>) -> Self {
+impl<T: ?Sized, S, R> Commands<T, S, R> {
+    pub fn new(commands: Vec<CommandNode<T, S, R>>) -> Self {
         Self { commands }
     }
 
@@ -23,7 +23,7 @@ impl<T: ?Sized, S> Commands<T, S> {
         &'a self,
         actor: &'a mut T,
         message: &'a CommandMessage<S>,
-    ) -> impl Iterator<Item = Response> + 'a {
+    ) -> impl Iterator<Item = R> + 'a {
         self.find_commands(message)
             .map(move |(command, args)| command(actor, &message.sender, args))
     }
@@ -31,7 +31,7 @@ impl<T: ?Sized, S> Commands<T, S> {
     pub fn find_commands<'a>(
         &'a self,
         message: &'a CommandMessage<S>,
-    ) -> impl Iterator<Item = (Command<T, S>, Vec<Argument>)> + 'a {
+    ) -> impl Iterator<Item = (Command<T, S, R>, Vec<Argument>)> + 'a {
         let message_text = &message.message_text;
         let message_authority_level = message.authority_level;
 
