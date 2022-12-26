@@ -60,7 +60,7 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
     /// Assumes that at least one node has been inserted before
     pub fn split(self, children: impl IntoIterator<Item = CommandNode<T, S>>) -> CommandNode<T, S> {
         assert!(
-            self.nodes.len() > 0,
+            !self.nodes.is_empty(),
             "Expected at least one node in the builder"
         );
 
@@ -71,6 +71,12 @@ impl<T: ?Sized, S> CommandBuilder<T, S> {
             .expect("A final node cannot be in the middle");
         child_nodes.extend(children);
         fold_nodes(final_node, nodes)
+    }
+}
+
+impl<T: ?Sized, S> Default for CommandBuilder<T, S> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

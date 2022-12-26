@@ -59,12 +59,11 @@ impl<T: ?Sized, S> CommandNode<T, S> {
             } => literals
                 .iter()
                 .find(|&literal| message.starts_with(literal))
-                .map(|literal| {
+                .and_then(|literal| {
                     let message = message[literal.len()..].trim();
                     child_nodes!(child_nodes, message, arguments);
                     None
-                })
-                .flatten(),
+                }),
 
             CommandNode::Argument {
                 argument_type,
@@ -79,13 +78,12 @@ impl<T: ?Sized, S> CommandNode<T, S> {
                     }
                 }
             }
-            .map(|argument| {
+            .and_then(|argument| {
                 let message = message[argument.len()..].trim();
                 arguments.push(argument.to_owned());
                 child_nodes!(child_nodes, message, arguments);
                 None
-            })
-            .flatten(),
+            }),
 
             CommandNode::ArgumentChoice {
                 choices,
@@ -93,13 +91,12 @@ impl<T: ?Sized, S> CommandNode<T, S> {
             } => choices
                 .iter()
                 .find(|choice| message.starts_with(*choice))
-                .map(|choice| {
+                .and_then(|choice| {
                     let message = message[choice.len()..].trim();
                     arguments.push(choice.to_owned());
                     child_nodes!(child_nodes, message, arguments);
                     None
-                })
-                .flatten(),
+                }),
 
             &CommandNode::Final {
                 expects_empty_message,

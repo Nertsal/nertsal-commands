@@ -1,7 +1,7 @@
 use super::*;
 
 impl<T: ?Sized, S> CommandNode<T, S> {
-    pub fn literal<'a>(
+    pub fn literal(
         literals: impl IntoIterator<Item = impl Into<String>>,
         children: Vec<CommandNode<T, S>>,
     ) -> Self {
@@ -18,7 +18,7 @@ impl<T: ?Sized, S> CommandNode<T, S> {
         }
     }
 
-    pub fn argument_choice<'a>(
+    pub fn argument_choice(
         choices: impl IntoIterator<Item = impl Into<String>>,
         children: Vec<CommandNode<T, S>>,
     ) -> Self {
